@@ -1,0 +1,23 @@
+{{ template "header" . }}
+<h1>List of tasks</h1>
+{{ if not .Tasks }}
+<p>登録データがありません．</p>
+{{ else }}
+<table>
+    <tr>
+        <th>ID</th>
+        <th>タイトル</th>
+        <th>登録日</th>
+        <th>状態</th>
+    </tr>
+    {{ range $task := .Tasks }}
+    <tr>
+        <td><a href="/task/{{ $task.Id }}">{{ $task.Id }}</a></td>
+        <td>{{ $task.Title }}</td>
+        <td>{{ $task.CreatedAt }}</td>
+        <td>{{ if $task.IsDone }}済{{ end }}</td>
+    </tr>
+    {{ end }}
+</table>
+{{ end }}
+{{ template "footer" }}
