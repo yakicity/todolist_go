@@ -1,5 +1,6 @@
 package db
 
+// conn.go provides helper functions for connection to DB
 import (
 	"errors"
 	"fmt"
