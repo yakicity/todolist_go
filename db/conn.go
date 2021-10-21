@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"  // initialize mysql driver
 	"github.com/jmoiron/sqlx"
 )
 
-var db *sqlx.DB
+var _db *sqlx.DB
 
-// DefaultDNS creates default DSN string
+// DefaultDSN creates default DSN string
 func DefaultDSN(host, port, user, password, dbname string) string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Asia%%2FTokyo", user, password, host, port, dbname)
 }
@@ -30,21 +30,21 @@ func Connect(dsn string) error {
 	}
 
 	// Bind connection
-	db = conn
+	_db = conn
 	return nil
 }
 
 // Disconnect closes connection
 func Disconnect() {
-	if db != nil {
-		db.Close()
+	if _db != nil {
+		_db.Close()
 	}
 }
 
 // GetConnection returns DB connection
 func GetConnection() (*sqlx.DB, error) {
-	if db != nil {
-		return db, nil
+	if _db != nil {
+		return _db, nil
 	}
 	return nil, errors.New("Connection is not established")
 }
