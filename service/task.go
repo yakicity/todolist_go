@@ -13,7 +13,7 @@ func TaskList(ctx *gin.Context) {
 	// Get DB connection
 	db, err := database.GetConnection()
 	if err != nil {
-		ctx.String(http.StatusInternalServerError, err.Error())
+		Error(http.StatusInternalServerError, err.Error())(ctx)
 		return
 	}
 
@@ -21,7 +21,7 @@ func TaskList(ctx *gin.Context) {
 	var tasks []database.Task
 	err = db.Select(&tasks, "SELECT * FROM tasks") // Use DB#Select for multiple entries
 	if err != nil {
-		ctx.String(http.StatusInternalServerError, err.Error())
+		Error(http.StatusInternalServerError, err.Error())(ctx)
 		return
 	}
 
@@ -34,14 +34,14 @@ func ShowTask(ctx *gin.Context) {
 	// Get DB connection
 	db, err := database.GetConnection()
 	if err != nil {
-		ctx.String(http.StatusInternalServerError, err.Error())
+		Error(http.StatusInternalServerError, err.Error())(ctx)
 		return
 	}
 
 	// parse ID given as a parameter
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		ctx.String(http.StatusBadRequest, err.Error())
+		Error(http.StatusBadRequest, err.Error())(ctx)
 		return
 	}
 
@@ -49,10 +49,10 @@ func ShowTask(ctx *gin.Context) {
 	var task database.Task
 	err = db.Get(&task, "SELECT * FROM tasks WHERE id=?", id) // Use DB#Get for one entry
 	if err != nil {
-		ctx.String(http.StatusBadRequest, err.Error())
+		Error(http.StatusBadRequest, err.Error())(ctx)
 		return
 	}
 
 	// Render task
-	ctx.String(http.StatusOK, task.Title)
+	ctx.String(http.StatusOK, task.Title)  // Modify it!!
 }
