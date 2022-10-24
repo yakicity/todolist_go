@@ -4,9 +4,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: app
     tty: true
     environment:
-      DB_HOST: mysql_server
+      DB_HOST: db
       DB_PORT: 3306
       DB_USER: sysdes
       DB_PASSWORD: sysdes
@@ -21,7 +22,7 @@ services:
     build:
       context: ./docker/db
       dockerfile: Dockerfile
-    container_name: mysql_server
+    container_name: db
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: sysdes_todolist_db
@@ -35,10 +36,10 @@ services:
       - 3306:3306
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: mysql_client
+    container_name: phpmyadmin
     environment:
       - PMA_ARBITRARY=1
-      - PMA_HOSTS=mysql_server
+      - PMA_HOSTS=db
       - PMA_USER=root
       - PMA_PASSWORD=root
     ports:
