@@ -22,6 +22,7 @@ services:
     build:
       context: ./docker/db
       dockerfile: Dockerfile
+    platform: linux/x86_64
     container_name: db
     environment:
       MYSQL_ROOT_PASSWORD: root
