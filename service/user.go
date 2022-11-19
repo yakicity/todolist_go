@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"net/http"
 
+	"regexp"
+
 	"github.com/gin-gonic/gin"
 	database "todolist.go/db"
 )
@@ -41,12 +43,6 @@ func RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	// パスワード確認
-	if password != passwordForConfirm {
-		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password for confirmation is not correct ", "Username": username})
-		return
-	}
-
 	// 重複チェック
 	var duplicate int
 	err = db.Get(&duplicate, "SELECT COUNT(*) FROM users WHERE name=?", username)
@@ -57,6 +53,16 @@ func RegisterUser(ctx *gin.Context) {
 	if duplicate > 0 {
 
 		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Username is already taken", "Username": username})
+		return
+	}
+
+	// パスワード二回入力があっているか確認
+	if password != passwordForConfirm {
+		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password for confirmation is not correct ", "Username": username})
+		return
+	}
+	if !matchPassword(password) {
+		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password does not meet the conditions", "Username": username})
 		return
 	}
 
@@ -76,4 +82,24 @@ func RegisterUser(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, user)
+}
+
+func matchPassword(password string) bool {
+	if len(password) < 8 { // 6文字以上か判定
+		return false
+	}
+	if !(regexp.MustCompile("^[0-9a-zA-Z!-/:-@[-`{-~]+$").Match([]byte(password))) { // 英数字記号以外を使っているか判定
+		return false
+	}
+	reg := []*regexp.Regexp{
+		regexp.MustCompile(`[[:alpha:]]`), // 英字が含まれるか判定
+		regexp.MustCompile(`[[:digit:]]`), // 数字が含まれるか判定
+		// regexp.MustCompile([[:punct:]]), // 記号が含まれるか判定
+	}
+	for _, r := range reg {
+		if r.FindString(password) == "" {
+			return false
+		}
+	}
+	return true
 }
