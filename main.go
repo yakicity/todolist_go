@@ -36,6 +36,21 @@ func main() {
 	engine.GET("/list", service.TaskList)
 	engine.GET("/task/:id", service.ShowTask) // ":id" is a parameter
 
+	// タスクの新規登録
+	engine.GET("/task/new", service.NewTaskForm)
+	engine.POST("/task/new", service.RegisterTask)
+
+	// 既存タスクの編集
+	engine.GET("/task/edit/:id", service.EditTaskForm)
+	engine.POST("/task/edit/:id", service.UpdateTask)
+
+	// 既存タスクの削除
+	engine.GET("/task/delete/:id", service.DeleteTask)
+
+	// ユーザ登録
+	engine.GET("/user/new", service.NewUserForm)
+	engine.POST("/user/new", service.RegisterUser)
+
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))
 }
