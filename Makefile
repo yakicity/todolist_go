@@ -25,3 +25,6 @@ fmt:
 
 clean:
 	@$(CMD) down --rmi all --volumes --remove-orphans
+
+sessions:
+	@$(CMD) exec app go get github.com/gin-contrib/sessions

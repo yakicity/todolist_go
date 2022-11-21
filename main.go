@@ -8,6 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 
+    "github.com/gin-contrib/sessions"
+    "github.com/gin-contrib/sessions/cookie"
+
 	"todolist.go/db"
 	"todolist.go/service"
 )
@@ -30,6 +33,10 @@ func main() {
 	engine := gin.Default()
 	engine.LoadHTMLGlob("views/*.html")
 
+    // prepare session
+    store := cookie.NewStore([]byte("my-secret"))
+    engine.Use(sessions.Sessions("user-session", store))
+
 	// routing
 	engine.Static("/assets", "./assets")
 	engine.GET("/", service.Home)
@@ -50,6 +57,10 @@ func main() {
 	// ユーザ登録
 	engine.GET("/user/new", service.NewUserForm)
 	engine.POST("/user/new", service.RegisterUser)
+
+	//ログイン
+	engine.GET("/login", service.LoginPage)
+	engine.POST("/login", service.Login)	
 
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))
