@@ -20,3 +20,11 @@ CREATE TABLE `users` (
     `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `ownership`;
+ 
+CREATE TABLE `ownership` (
+    `user_id` bigint(20) NOT NULL,
+    `task_id` bigint(20) NOT NULL,
+    PRIMARY KEY (`user_id`, `task_id`)
+) DEFAULT CHARSET=utf8mb4;

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"encoding/hex"
 	"regexp"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/sessions"
 	database "todolist.go/db"
@@ -82,7 +82,8 @@ func RegisterUser(ctx *gin.Context) {
 		Error(http.StatusInternalServerError, err.Error())(ctx)
 		return
 	}
-	ctx.JSON(http.StatusOK, user)
+	// ctx.JSON(http.StatusOK, user)
+	ctx.HTML(http.StatusOK, "index.html", gin.H{"Title": "Task list"})
 }
 
 func matchPassword(password string) bool {
@@ -145,4 +146,25 @@ func Login(ctx *gin.Context) {
     session.Save()
  
     ctx.Redirect(http.StatusFound, "/list")
+}
+
+// ログインチェック
+func LoginCheck(ctx *gin.Context) {
+    if sessions.Default(ctx).Get(userkey) == nil {
+        // ログイン状態
+		fmt.Println("IIIIIIIIIIIIII")
+		ctx.Redirect(http.StatusFound, "/login")
+        ctx.Abort()
+    } else {
+		// 非ログイン
+        ctx.Next()
+    }
+}
+
+func Logout(ctx *gin.Context) {
+    session := sessions.Default(ctx)
+    session.Clear()
+    session.Options(sessions.Options{MaxAge: -1})
+    session.Save()
+    ctx.Redirect(http.StatusFound, "/")
 }

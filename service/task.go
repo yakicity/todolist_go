@@ -6,11 +6,13 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/sessions"
 	database "todolist.go/db"
 )
 
 // TaskList renders list of tasks in DB
 func TaskList(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
 	// Get DB connection
 	db, err := database.GetConnection()
 	if err != nil {
@@ -26,11 +28,12 @@ func TaskList(ctx *gin.Context) {
 	fmt.Println(is_done)
 	fmt.Println(isnot_done)
 	var tasks []database.Task
-	switch {
-	case kw != "":
-		err = db.Select(&tasks, "SELECT * FROM tasks WHERE title LIKE ?", "%"+kw+"%")
+    query := "SELECT id, title, created_at, is_done FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ?"
+    switch {
+    case kw != "":
+        err = db.Select(&tasks, query + " AND title LIKE ?", userID, "%" + kw + "%")
 	case (is_done == "t" && isnot_done == "f"):
-		err = db.Select(&tasks, "SELECT * FROM tasks")
+		err = db.Select(&tasks, query, userID)
 		SelectStatus = "完了未完了全て"
 	case (is_done == "t" && isnot_done == "") || (is_done == "t" && isnot_done == "t"):
 		is_done_bool, err := strconv.ParseBool(is_done)
@@ -38,7 +41,7 @@ func TaskList(ctx *gin.Context) {
 			Error(http.StatusInternalServerError, err.Error())(ctx)
 			return
 		}
-		err = db.Select(&tasks, "SELECT * FROM tasks WHERE is_done LIKE ?", is_done_bool)
+		err = db.Select(&tasks, query + " AND is_done LIKE ?", userID, is_done_bool)
 		SelectStatus = "完了のみ"
 	case (is_done == "" && isnot_done == "f") || (is_done == "f" && isnot_done == "f"):
 		isnot_done_bool, err := strconv.ParseBool(isnot_done)
@@ -46,23 +49,41 @@ func TaskList(ctx *gin.Context) {
 			Error(http.StatusInternalServerError, err.Error())(ctx)
 			return
 		}
-		err = db.Select(&tasks, "SELECT * FROM tasks WHERE is_done LIKE ?", isnot_done_bool)
+		err = db.Select(&tasks, query + " AND is_done LIKE ?", userID, isnot_done_bool)
 		SelectStatus = "未完了のみ"
-	default:
+    default:
 		fmt.Println("default case")
-		// err = db.Select(&tasks, "SELECT * FROM tasks")
-	}
+    }
+	// switch {
+	// case kw != "":
+	// 	err = db.Select(&tasks, "SELECT * FROM tasks WHERE title LIKE ?", "%"+kw+"%")
+	// case (is_done == "t" && isnot_done == "f"):
+	// 	err = db.Select(&tasks, "SELECT * FROM tasks")
+	// 	SelectStatus = "完了未完了全て"
+	// case (is_done == "t" && isnot_done == "") || (is_done == "t" && isnot_done == "t"):
+	// 	is_done_bool, err := strconv.ParseBool(is_done)
+	// 	if err != nil {
+	// 		Error(http.StatusInternalServerError, err.Error())(ctx)
+	// 		return
+	// 	}
+	// 	err = db.Select(&tasks, "SELECT * FROM tasks WHERE is_done LIKE ?", is_done_bool)
+	// 	SelectStatus = "完了のみ"
+	// case (is_done == "" && isnot_done == "f") || (is_done == "f" && isnot_done == "f"):
+	// 	isnot_done_bool, err := strconv.ParseBool(isnot_done)
+	// 	if err != nil {
+	// 		Error(http.StatusInternalServerError, err.Error())(ctx)
+	// 		return
+	// 	}
+	// 	err = db.Select(&tasks, "SELECT * FROM tasks WHERE is_done LIKE ?", isnot_done_bool)
+	// 	SelectStatus = "未完了のみ"
+	// default:
+	// 	fmt.Println("default case")
+	// 	// err = db.Select(&tasks, "SELECT * FROM tasks")
+	// }
 	if err != nil {
 		Error(http.StatusInternalServerError, err.Error())(ctx)
 		return
 	}
-	// // Get tasks in DB
-	// var tasks []database.Task
-	// err = db.Select(&tasks, "SELECT * FROM tasks") // Use DB#Select for multiple entries
-	// if err != nil {
-	// 	Error(http.StatusInternalServerError, err.Error())(ctx)
-	// 	return
-	// }
 
 	// Render tasks
 	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks, "Kw": kw, "SelectStatus": SelectStatus})
