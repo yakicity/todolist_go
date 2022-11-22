@@ -122,6 +122,7 @@ func NewTaskForm(ctx *gin.Context) {
 }
 
 func RegisterTask(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
 	// Get task title
 	title, exist := ctx.GetPostForm("title")
 	if !exist {
@@ -134,23 +135,50 @@ func RegisterTask(ctx *gin.Context) {
 		description = "there is no description"
 	}
 	// Get DB connection
-	db, err := database.GetConnection()
-	if err != nil {
-		Error(http.StatusInternalServerError, err.Error())(ctx)
-		return
-	}
-	// Create new data with given title on DB
-	result, err := db.Exec("INSERT INTO tasks (title, description) VALUES (?,?)", title, description)
-	if err != nil {
-		Error(http.StatusInternalServerError, err.Error())(ctx)
-		return
-	}
-	// Render status
-	path := "/list" // デフォルトではタスク一覧ページへ戻る
-	if id, err := result.LastInsertId(); err == nil {
-		path = fmt.Sprintf("/task/%d", id) // 正常にIDを取得できた場合は /task/<id> へ戻る
-	}
-	ctx.Redirect(http.StatusFound, path)
+    // Get DB connection
+    db, err := database.GetConnection()
+    if err != nil {
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    tx := db.MustBegin()
+    result, err := tx.Exec("INSERT INTO tasks (title) VALUES (?)", title)
+    if err != nil {
+        tx.Rollback()
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    taskID, err := result.LastInsertId()
+    if err != nil {
+        tx.Rollback()
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    _, err = tx.Exec("INSERT INTO ownership (user_id, task_id) VALUES (?, ?)", userID, taskID)
+    if err != nil {
+        tx.Rollback()
+        Error(http.StatusInternalServerError, err.Error())(ctx)
+        return
+    }
+    tx.Commit()
+    ctx.Redirect(http.StatusFound, fmt.Sprintf("/task/%d", taskID))
+	// db, err := database.GetConnection()
+	// if err != nil {
+	// 	Error(http.StatusInternalServerError, err.Error())(ctx)
+	// 	return
+	// }
+	// // Create new data with given title on DB
+	// result, err := db.Exec("INSERT INTO tasks (title, description) VALUES (?,?)", title, description)
+	// if err != nil {
+	// 	Error(http.StatusInternalServerError, err.Error())(ctx)
+	// 	return
+	// }
+	// // Render status
+	// path := "/list" // デフォルトではタスク一覧ページへ戻る
+	// if id, err := result.LastInsertId(); err == nil {
+	// 	path = fmt.Sprintf("/task/%d", id) // 正常にIDを取得できた場合は /task/<id> へ戻る
+	// }
+	// ctx.Redirect(http.StatusFound, path)
 }
 
 func EditTaskForm(ctx *gin.Context) {

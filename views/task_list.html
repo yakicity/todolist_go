@@ -1,4 +1,5 @@
 {{ template "header" . }}
+
 <h1>List of tasks</h1>
 <form action="/list" method="GET">
   <input type="text" name="kw" value="{{ .Kw }}" />
@@ -14,20 +15,111 @@
 {{ if not .Tasks }}
 <p>登録データがありません．</p>
 {{ else }}
-<table>
-  <tr>
-    <th>ID</th>
-    <th>タイトル</th>
-    <th>登録日</th>
-    <th>状態</th>
-  </tr>
-  {{ range $task := .Tasks }}
-  <tr>
-    <td><a href="/task/{{ $task.ID }}">{{ $task.ID }}</a></td>
-    <td>{{ $task.Title }}</td>
-    <td>{{ $task.CreatedAt }}</td>
-    <td>{{ if $task.IsDone }}済{{ end }}</td>
-  </tr>
-  {{ end }}
-</table>
-{{ end }} {{ template "footer" }}
+<div id="users">
+  <table>
+    <thead>
+      <tr>
+        <th class="sort" data-sort="id">ID</th>
+        <th class="sort" data-sort="title">タイトル</th>
+        <th class="sort" data-sort="date">登録日</th>
+        <th class="sort" data-sort="condition">状態</th>
+      </tr>
+    </thead>
+    <!-- IMPORTANT, class="list" have to be at tbody -->
+    <tbody class="list">
+      {{ range $task := .Tasks }}
+      <tr>
+        <td class="id"><a href="/task/{{ $task.ID }}">{{ $task.ID }}</a></td>
+        <td class="title">{{ $task.Title }}</td>
+        <td class="date">{{ $task.CreatedAt }}</td>
+        <td class="condition">{{ if $task.IsDone }}済{{ end }}</td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+  <!-- wrap list.js pagination by div.pager for using pager sample css -->
+  <div class="pager">
+    <ul class="pagination"></ul>
+  </div>
+</div>
+{{ end }}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+<script>
+  var options = {
+    valueNames: ["id", "title", "date", "condition"],
+    page: 3,
+    pagination: {
+      paginationClass: "pagination",
+      innerWindow: 1,
+      outerWindow: 1,
+    },
+  };
+  var userList = new List("users", options);
+
+  userList.on("sortStart", function (a) {
+    console.log(a.i);
+    a.i = 1;
+  });
+
+  //for initial sort
+  userList.sort("id", { order: "asc" });
+</script>
+
+<style>
+  /* style for sort */
+  .sort.desc:after {
+    content: "▼";
+  }
+  .sort.asc:after {
+    content: "▲";
+  }
+</style>
+
+<style>
+  /* style for pager and pagination from http://wwx.jp/css-pagination*/
+
+  .pager {
+    overflow: hidden;
+  }
+
+  .pager ul {
+    list-style: none;
+    position: relative;
+    left: 50%;
+    float: left;
+  }
+
+  .pager ul li {
+    margin: 0 1px;
+    position: relative;
+    left: -50%;
+    float: left;
+  }
+
+  .pager ul li span,
+  .pager ul li a {
+    display: block;
+    font-size: 16px;
+    padding: 0.6em 1em;
+    border-radius: 3px;
+  }
+
+  .pager ul li a {
+    background: #eee;
+    color: #000;
+    text-decoration: none;
+  }
+
+  .pager ul li a:hover {
+    background: #333;
+    color: #fff;
+  }
+
+  /* added by myself */
+  .pager ul li.active {
+    font-weight: bold;
+  }
+</style>
+
+{{ template "footer" }}
