@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"encoding/hex"
 	"regexp"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/sessions"
 	database "todolist.go/db"
@@ -83,7 +82,8 @@ func RegisterUser(ctx *gin.Context) {
 		return
 	}
 	// ctx.JSON(http.StatusOK, user)
-	ctx.HTML(http.StatusOK, "index.html", gin.H{"Title": "Task list"})
+	// ctx.HTML(http.StatusOK, "index.html", gin.H{"Title": "Task list"})
+	ctx.Redirect(http.StatusFound, "/login")
 }
 
 func matchPassword(password string) bool {
@@ -152,7 +152,6 @@ func Login(ctx *gin.Context) {
 func LoginCheck(ctx *gin.Context) {
     if sessions.Default(ctx).Get(userkey) == nil {
         // ログイン状態
-		fmt.Println("IIIIIIIIIIIIII")
 		ctx.Redirect(http.StatusFound, "/login")
         ctx.Abort()
     } else {
@@ -166,5 +165,29 @@ func Logout(ctx *gin.Context) {
     session.Clear()
     session.Options(sessions.Options{MaxAge: -1})
     session.Save()
-    ctx.Redirect(http.StatusFound, "/")
+    ctx.Redirect(http.StatusFound, "/login")
+}
+
+
+func DeleteUser(ctx *gin.Context){
+	//ログインしてる前提で
+	userID := sessions.Default(ctx).Get("user")
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	_, err = db.Exec("DELETE tasks, ownership FROM tasks INNER JOIN ownership ON task_id = id WHERE ownership.user_id = ?",userID)
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	_, err = db.Exec("DELETE FROM users WHERE id=?", userID)
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	// logout
+	Logout(ctx)
 }

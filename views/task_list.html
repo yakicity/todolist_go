@@ -2,16 +2,35 @@
 
 <h1>List of tasks</h1>
 <form action="/list" method="GET">
-  <input type="text" name="kw" value="{{ .Kw }}" />
+  <input type="text" class="input" name="kw" value="{{ .Kw }}" />
   <br />
-  {{.SelectStatus}}
-  <input type="checkbox" name="is_done" value="t" /><label>完了</label>
-  <input type="checkbox" name="isnot_done" value="f" /><label>未完了</label>
-  <input type="submit" value="検索" />
+  <div class="list">
+    <dl>
+      <dt><label>{{.SelectStatus}}</label></dt>
+      <dd>
+        <input
+          type="checkbox"
+          name="is_done"
+          value="t"
+          id="t"
+          class="checkbox1"
+        /><label for="t" class="check_label">完了</label>
+        <input
+          type="checkbox"
+          name="isnot_done"
+          value="f"
+          id="f"
+          class="checkbox1"
+        /><label for="f" class="check_label">未完了</label>
+        <input type="submit" value="検索" class="btn" />
+      </dd>
+    </dl>
+  </div>
 </form>
-<p><a href="/task/new">新規登録</a></p>
-<a href="/"><button type="button">トップページへ戻る</button></a>
-<p><a href="/logout">ログアウト</a></p>
+<a href="/task/new"><button class="btn" type="button">新規登録</button></a>
+<button type="button" onclick="confirm_userdelete()">アカウント削除</button>
+<a href="/"><button class="btn" type="button">トップページへ戻る</button></a>
+<a href="/logout"><button class="btn" type="button">ログアウト</button></a>
 {{ if not .Tasks }}
 <p>登録データがありません．</p>
 {{ else }}
@@ -23,6 +42,8 @@
         <th class="sort" data-sort="title">タイトル</th>
         <th class="sort" data-sort="date">登録日</th>
         <th class="sort" data-sort="condition">状態</th>
+        <th class="sort" data-sort="priority">優先度</th>
+        <th class="sort" data-sort="deadline">締め切り</th>
       </tr>
     </thead>
     <!-- IMPORTANT, class="list" have to be at tbody -->
@@ -33,6 +54,8 @@
         <td class="title">{{ $task.Title }}</td>
         <td class="date">{{ $task.CreatedAt }}</td>
         <td class="condition">{{ if $task.IsDone }}済{{ end }}</td>
+        <td class="priority">{{ $task.Priority }}</td>
+        <td class="deadline">{{ $task.Deadline }}</td>
       </tr>
       {{ end }}
     </tbody>
@@ -42,13 +65,12 @@
     <ul class="pagination"></ul>
   </div>
 </div>
-{{ end }}
-
+{{ end }} {{ template "footer" }}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
 <script>
   var options = {
-    valueNames: ["id", "title", "date", "condition"],
-    page: 3,
+    valueNames: ["id", "title", "date", "condition", "priority", "deadline"],
+    page: 10,
     pagination: {
       paginationClass: "pagination",
       innerWindow: 1,
@@ -65,61 +87,3 @@
   //for initial sort
   userList.sort("id", { order: "asc" });
 </script>
-
-<style>
-  /* style for sort */
-  .sort.desc:after {
-    content: "▼";
-  }
-  .sort.asc:after {
-    content: "▲";
-  }
-</style>
-
-<style>
-  /* style for pager and pagination from http://wwx.jp/css-pagination*/
-
-  .pager {
-    overflow: hidden;
-  }
-
-  .pager ul {
-    list-style: none;
-    position: relative;
-    left: 50%;
-    float: left;
-  }
-
-  .pager ul li {
-    margin: 0 1px;
-    position: relative;
-    left: -50%;
-    float: left;
-  }
-
-  .pager ul li span,
-  .pager ul li a {
-    display: block;
-    font-size: 16px;
-    padding: 0.6em 1em;
-    border-radius: 3px;
-  }
-
-  .pager ul li a {
-    background: #eee;
-    color: #000;
-    text-decoration: none;
-  }
-
-  .pager ul li a:hover {
-    background: #333;
-    color: #fff;
-  }
-
-  /* added by myself */
-  .pager ul li.active {
-    font-weight: bold;
-  }
-</style>
-
-{{ template "footer" }}

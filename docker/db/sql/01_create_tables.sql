@@ -7,6 +7,8 @@ CREATE TABLE `tasks` (
     `is_done` boolean NOT NULL DEFAULT b'0',
     `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `description` varchar(256) NOT NULL DEFAULT 'there is no description',
+    `priority` bigint(20) NOT NULL DEFAULT '2',
+    `deadline` datetime NOT NULL,
     PRIMARY KEY (`id`)
 ) DEFAULT CHARSET=utf8mb4;
 
