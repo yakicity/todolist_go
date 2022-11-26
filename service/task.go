@@ -21,40 +21,33 @@ func TaskList(ctx *gin.Context) {
 	}
 	// Get query parameter
 	kw := ctx.Query("kw")
-	is_done := ctx.Query("is_done")
-	isnot_done := ctx.Query("isnot_done")
-	SelectStatus := "完了条件なし"
+	is_done_status := ctx.Query("is_done_status")
 	// Get tasks in DB
-	fmt.Println(is_done)
-	fmt.Println(isnot_done)
+	fmt.Println(is_done_status)
 	
 	var tasks []database.Task
     query := "SELECT id, title, created_at, is_done, description, priority, deadline FROM tasks INNER JOIN ownership ON task_id = id WHERE user_id = ?"
     switch {
     case kw != "":
         err = db.Select(&tasks, query + " AND title LIKE ?", userID, "%" + kw + "%")
-	case (is_done == "t" && isnot_done == "f"):
+	case (is_done_status == "all"):
 		err = db.Select(&tasks, query, userID)
-		SelectStatus = "全タスク"
-	case (is_done == "t" && isnot_done == "") || (is_done == "t" && isnot_done == "t"):
-		is_done_bool, err := strconv.ParseBool(is_done)
+	case (is_done_status == "t"):
+		is_done_bool, err := strconv.ParseBool(is_done_status)
 		if err != nil {
 			Error(http.StatusInternalServerError, err.Error())(ctx)
 			return
 		}
 		err = db.Select(&tasks, query + " AND is_done LIKE ?", userID, is_done_bool)
-		SelectStatus = "完了タスク"
-	case (is_done == "" && isnot_done == "f") || (is_done == "f" && isnot_done == "f"):
-		isnot_done_bool, err := strconv.ParseBool(isnot_done)
+	case (is_done_status == "f"):
+		is_done_bool, err := strconv.ParseBool(is_done_status)
 		if err != nil {
 			Error(http.StatusInternalServerError, err.Error())(ctx)
 			return
 		}
-		err = db.Select(&tasks, query + " AND is_done LIKE ?", userID, isnot_done_bool)
-		SelectStatus = "未完了タスク"
+		err = db.Select(&tasks, query + " AND is_done LIKE ?", userID, is_done_bool)
     default:
 		err = db.Select(&tasks, query, userID)
-		SelectStatus = "全タスク"
 		fmt.Println("default case")
     }
 	if err != nil {
@@ -63,14 +56,8 @@ func TaskList(ctx *gin.Context) {
 	}
 
 	// Render tasks
-	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks, "Kw": kw, "SelectStatus": SelectStatus})
+	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks, "Kw": kw,"Value":is_done_status})
 }
-
-
-// type ownership struct {
-// 	user_id    int
-// 	task_id    int
-// }
 
 // ShowTask renders a task with given ID
 func ShowTask(ctx *gin.Context) {
@@ -271,14 +258,22 @@ func UpdateTask(ctx *gin.Context) {
 	if description == "" {
 		description = "there is no description"
 	}
+
+	deadlinedate, exist := ctx.GetPostForm("deadlinedate")
+	deadlinetime, exist := ctx.GetPostForm("deadlinetime")
+	priority, exist := ctx.GetPostForm("priority")
+
+	deadline := deadlinedate + " " + deadlinetime + ":00"
+	fmt.Println(deadline)
+
 	// Get DB connection
 	db, err := database.GetConnection()
 	if err != nil {
 		Error(http.StatusInternalServerError, err.Error())(ctx)
 		return
 	}
-	// Create new data with given title on DB
-	_, err = db.Exec("UPDATE tasks SET title=?,is_done=?,description=? WHERE id=?", title, is_done_bool, description, id)
+
+	_, err = db.Exec("UPDATE tasks SET title=?,is_done=?,description=?,priority=?,deadline=? WHERE id=?", title, is_done_bool, description,priority,deadline, id)
 	if err != nil {
 		Error(http.StatusInternalServerError, err.Error())(ctx)
 		return

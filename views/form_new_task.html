@@ -1,20 +1,23 @@
 {{ template "header" . }}
 <h1>タスクの新規登録</h1>
 <form action="/task/new" method="POST">
-  <label>Title</label><input type="text" class="input" name="title" required />
+  <label>Title : </label><input type="text" class="input" name="title" required />
   <br />
-  <label>Description</label>
+  <label>Description : </label>
   <textarea name="description"></textarea>
   <br>
-  <input type="date" name="deadlinedate" required /></input>
-  <input type="time" value="00:00" name="deadlinetime"></input>
+  <input class = "date" type="date" name="deadlinedate" required /></input>
+  <input class = "date" type="time" value="00:00" name="deadlinetime"></input>
   <select name="priority">
-  <option value="1">低</option>
-  <option value="2" selected>普</option>
-  <option value="3">高</option>
-</select>
-  <input type="submit" value="登録" />
+    <option value="1">低</option>
+    <option value="2" selected>普</option>
+    <option value="3">高</option>
+  </select>
+  <input class = "btn" type="submit" value="登録" />
 </form>
+<div class="inner">
 <a href="/list"><button class="btn" type="button">戻る</button></a>
-<p><a href="/logout">ログアウト</a></p>
+<a href="/logout"><button class="btn" type="button">ログアウト</button></a>
+<!-- <p><a href="/logout">ログアウト</a></p> -->
+</div>
 {{ template "footer" }}

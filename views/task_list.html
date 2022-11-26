@@ -2,40 +2,27 @@
 
 <h1>List of tasks</h1>
 <form action="/list" method="GET">
-  <input type="text" class="input" name="kw" value="{{ .Kw }}" />
-  <br />
-  <div class="list">
-    <dl>
-      <dt><label>{{.SelectStatus}}</label></dt>
-      <dd>
-        <input
-          type="checkbox"
-          name="is_done"
-          value="t"
-          id="t"
-          class="checkbox1"
-        /><label for="t" class="check_label">完了</label>
-        <input
-          type="checkbox"
-          name="isnot_done"
-          value="f"
-          id="f"
-          class="checkbox1"
-        /><label for="f" class="check_label">未完了</label>
-        <input type="submit" value="検索" class="btn" />
-      </dd>
-    </dl>
-  </div>
+  <input type="text" class="input" name="kw" value="{{ .Kw }}" placeholder="検索用語を記述してください" />
+
+  <select name="is_done_status" id="is_done_select">
+    <option value="all" {{ if eq .Value "all" }} selected {{ end }}>全件表示</option>
+    <option value="t" {{ if eq .Value "t" }} selected {{ end }}>完了タスクのみ</option>
+    <option value="f" {{ if eq .Value "f" }} selected {{ end }}>未完了タスクのみ</option>
+  </select>
+  <input type="submit" value="検索" class="btn" />
 </form>
-<a href="/task/new"><button class="btn" type="button">新規登録</button></a>
-<button type="button" onclick="confirm_userdelete()">アカウント削除</button>
-<a href="/"><button class="btn" type="button">トップページへ戻る</button></a>
-<a href="/logout"><button class="btn" type="button">ログアウト</button></a>
+<div class="inner">
+  <a href="/task/new"><button class="btn" type="button">新規登録</button></a>
+  <button class="btn" type="button" onclick="confirm_userdelete()">アカウント削除</button>
+  <a href="/"><button class="btn" type="button">トップページへ戻る</button></a>
+  <a href="/logout"><button class="btn" type="button">ログアウト</button></a>
+</div>
+<br>
 {{ if not .Tasks }}
 <p>登録データがありません．</p>
 {{ else }}
 <div id="users">
-  <table>
+  <table border="1">
     <thead>
       <tr>
         <th class="sort" data-sort="id">ID</th>

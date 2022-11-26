@@ -1,18 +1,28 @@
 {{ template "header" . }}
-<h1>Task {{ .Task.ID }}: edit</h1>
+<h1>Task {{ .Task.ID }} の編集</h1>
 <form action="/task/edit/{{ .Task.ID }}" method="POST" onsubmit = "return confirm_update({{ .Task.ID }})">
-    <label>Title</label><input type="text" name="title" value="{{ .Task.Title }}" required>
+    <label>Title : </label><input type="text" class="input" name="title" value="{{ .Task.Title }}" required>
     <br>
-    <label>Description</label>
-    <textarea name="description" cols="30" rows="10"  placeholder="{{ .Task.Description }}"></textarea>
+    <label>Description : </label>
+    <textarea name="description" placeholder="{{ .Task.Description }}"></textarea>
     <br>
     <input type="radio" name="is_done" value="t" {{ if .Task.IsDone }}checked{{ end }}><label>完了</label>
     <input type="radio" name="is_done" value="f" {{ if not .Task.IsDone }}checked{{ end }}><label>未完了</label>
     </br>
+    <input class = "date" type="date" name="deadlinedate" required /></input>
+    <input class = "date" type="time" value="00:00" name="deadlinetime"></input>
+    
+    <select name="priority">
+        <option value="1" {{ if eq .Task.Priority 1 }} selected {{ end }}>低</option>
+        <option value="2" {{ if eq .Task.Priority 2 }} selected {{ end }}>普</option>
+        <option value="3" {{ if eq .Task.Priority 3 }} selected {{ end }}>高</option>
+    </select>
     <input type="submit" value="登録">
-    <a href="/task/{{ .Task.ID }}"><button type="button">戻る</button></a>
 </form>
-<p><a href="/logout">ログアウト</a></p>
+<div class="inner">
+    <a href="/task/{{ .Task.ID }}"><button class = "btn" type="button">戻る</button></a>
+    <a href="/logout"><button class = "btn" type="button">ログアウト</button></a>
+</div>
 {{ template "footer" }}
 
 

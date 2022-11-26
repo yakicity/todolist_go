@@ -78,6 +78,8 @@ body {
   padding: 5px 15px;
   margin: 3px;
   font-size: 12px;
+  /* display: flex;
+  display: inline-block;*/
 }
 
 .btn:active {
@@ -95,9 +97,9 @@ body {
 
 textarea {
   /* 枠線を消す */
-  border: none;
+  /* border: none; */
   /* block要素にする */
-  display: block;
+  /* display: block; */
   width: 100%;
   height: 100px;
   font-family: inherit;
@@ -108,12 +110,23 @@ textarea {
 }
 
 .input {
-  border: none;
+  /* border: none; */
   color: #444;
-  font-size: 2rem;
-  padding: 1rem 2rem;
-  display: block;
-  width: 100%;
+  font-size: 16px;
+  padding: 5px 15px;
+  font-family: inherit;
+  /* display: block; */
+  width: 40%;
+  height: 32px;
+}
+
+.date {
+  color: #333;
+  font-size: 16px;
+  font-family: inherit;
+  /* padding: 0 10px; */
+  height: 32px;
+  width: 150px;
 }
 
 form {
@@ -122,61 +135,46 @@ form {
   width: 700px;
 }
 
-/* input[type="checkbox"] {
-  transform: scale(2);
-  margin: 0 4px 0 0;
+select {
+  /* appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none; */
+  /* border: none; */
+  color: #333;
+  font-size: 16px;
+  font-family: inherit;
+  /* padding: 0 10px; */
+  height: 32px;
+  width: 150px;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+  width: 1000px;
+}
+table tr:hover {
+  background-color: #d4f0fd;
+}
+/* table tr {
+  border-bottom: solid 1px #eee;
+  cursor: pointer;
 } */
 
-.list {
-  float: left;
-  width: 100%;
-  margin: 0 0 50px 0;
-  border-spacing: 0;
+.inner {
+  padding-top: 30px;
+  display: flex;
+  justify-content: space-evenly;
+  width: 450px;
 }
-.list dl {
-  width: 100%;
-  border: 1px solid #e4e4e4;
-}
-.list dl dt {
-  width: 30%;
-  padding: 2%;
-  display: inline-block;
-  vertical-align: middle;
-}
-.list dl dd {
-  width: 70%;
-  padding: 2%;
-  display: inline-block;
-  vertical-align: middle;
-  border-left: 1px dotted #e4e4e4;
-}
-.list dl.disabled,
-.list dl:disabled {
-  background: #efefef;
-  cursor: not-allowed;
-}
-input[type="checkbox"] {
-  display: none;
-}
-input[type="checkbox"].checkbox1:checked + label {
-  background: #31a9ee;
-  color: #ffffff;
-}
-.check_label:hover {
-  background-color: #e2edf9;
-}
-.check_label {
-  display: block;
-  float: left;
-  margin: 1px;
-  width: 70px;
-  height: 30px;
-  text-align: center;
-  line-height: 45px;
-  padding-left: 5px;
-  padding-right: 5px;
-  cursor: pointer;
-  color: #31a9ee;
-  border: 2px solid #006dd9;
-  border-radius: 5px;
+
+label {
+  font-size: 16px;
+  font-family: inherit;
+  /* width: 140px;
+  height: 50px;
+  margin: 10px;
+  padding: 7px 10px;
+  background: #ccc; */
 }

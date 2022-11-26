@@ -9,10 +9,18 @@
   <dd><input type="checkbox" {{ if .IsDone }}checked {{ end }}disabled />済</dd>
   <dt>description</dt>
   <dd>{{ .Description }}</dd>
+  <dt>priority</dt>
+  <dd>{{ .Priority }}</dd>
+  <dt>deadline</dt>
+  <dd>{{ .Deadline }}</dd>
 </dl>
-<a href="/list"><button type="button">リストへ戻る</button></a>
-<a href="/task/edit/{{ .ID }}"><button type="button">編集</button></a>
-<button type="button" onclick="confirm_delete({{ .ID }})">削除</button>
-<p><a href="/logout">ログアウト</a></p>
+
+<div class="inner">
+  <a href="/list"><button class= "btn" type="button">リストへ戻る</button></a>
+  <a href="/task/edit/{{ .ID }}"><button  class= "btn" type="button">編集</button></a>
+  <button  class= "btn" type="button" onclick="confirm_delete({{ .ID }})">削除</button>
+  <a href="/logout"><button  class= "btn" type="button">ログアウト</button></a>
+  <!-- <p><a href="/logout">ログアウト</a></p> -->
+</div>
 
 {{ template "footer" }}
