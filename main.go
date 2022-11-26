@@ -66,6 +66,13 @@ func main() {
 	engine.GET("/logout", service.Logout)	
 
 	engine.GET("/user/delete", service.LoginCheck, service.DeleteUser)
+
+	engine.GET("/user/edit", service.LoginCheck, service.EditUserForm)
+
+	engine.GET("/user/edit/name", service.LoginCheck, service.EditUserNameForm)
+	engine.POST("/user/edit/name", service.LoginCheck, service.UpdateUserName)
+	engine.GET("/user/edit/password", service.LoginCheck, service.EditUserPasswordForm)
+	engine.POST("/user/edit/password", service.LoginCheck, service.UpdateUserPassword)
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))
 }

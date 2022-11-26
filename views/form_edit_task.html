@@ -17,7 +17,7 @@
         <option value="2" {{ if eq .Task.Priority 2 }} selected {{ end }}>普</option>
         <option value="3" {{ if eq .Task.Priority 3 }} selected {{ end }}>高</option>
     </select>
-    <input type="submit" value="登録">
+    <input class="btn" type="submit" value="登録">
 </form>
 <div class="inner">
     <a href="/task/{{ .Task.ID }}"><button class = "btn" type="button">戻る</button></a>

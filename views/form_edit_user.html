@@ -1,0 +1,11 @@
+{{ template "header" . }}
+<h1>User {{ .User.Name }} の編集</h1>
+
+<ul>
+  <li><a href="/user/edit/name">ユーザー名変更ページ</a></li>
+  <li><a href="/user/edit/password">ユーザーパスワード変更ページ</a></li>
+</ul>
+<div class="inner">
+  <a href="/"><button class="btn" type="button">トップページへ戻る</button></a>
+</div>
+{{ template "footer" }}

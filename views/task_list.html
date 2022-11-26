@@ -25,11 +25,11 @@
   <table border="1">
     <thead>
       <tr>
-        <th class="sort" data-sort="id">ID</th>
+        <th class="sort" data-sort="id" style="width:50px;">ID</th>
         <th class="sort" data-sort="title">タイトル</th>
         <th class="sort" data-sort="date">登録日</th>
-        <th class="sort" data-sort="condition">状態</th>
-        <th class="sort" data-sort="priority">優先度</th>
+        <th class="sort" data-sort="condition" style="width:50px;">状態</th>
+        <th class="sort" data-sort="priority" style="width:80px;">優先度</th>
         <th class="sort" data-sort="deadline">締め切り</th>
       </tr>
     </thead>
@@ -37,11 +37,11 @@
     <tbody class="list">
       {{ range $task := .Tasks }}
       <tr>
-        <td class="id"><a href="/task/{{ $task.ID }}">{{ $task.ID }}</a></td>
+        <td class="id"  style="width:50px;"><a href="/task/{{ $task.ID }}">{{ $task.ID }}</a></td>
         <td class="title">{{ $task.Title }}</td>
         <td class="date">{{ $task.CreatedAt }}</td>
-        <td class="condition">{{ if $task.IsDone }}済{{ end }}</td>
-        <td class="priority">{{ $task.Priority }}</td>
+        <td class="condition" style="width:50px;">{{ if $task.IsDone }}済{{ end }}</td>
+        <td class="priority" style="width:80px;">{{ $task.Priority }}</td>
         <td class="deadline">{{ $task.Deadline }}</td>
       </tr>
       {{ end }}

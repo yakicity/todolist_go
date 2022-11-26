@@ -11,6 +11,13 @@ const confirm_update = (id) => {
     return false;
 }
 
+const confirm_user_update = (username) => {
+    if (window.confirm(`User: ${username} を変更します．よろしいですか？`)) {
+        return true;
+    }
+    return false;
+}
+
 const confirm_userdelete = () => {
     if(window.confirm(`あなたのアカウントを削除します．よろしいですか？`)) {
         location.href = `/user/delete`;

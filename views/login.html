@@ -4,10 +4,13 @@
 <p><font color="#FF0000">{{ .Error }}</font></p>
 {{ end }}
 <form action="/login" method="POST">
-    <label>ユーザ名: </label><input type="text" name="username" value="{{ .Username }}" required><br>
-    <label>パスワード: </label><input type="password" name="password" required></br>
-    <input type="submit" value="ログイン">
+    <label>ユーザー名: </label><input type="text" class="input"  name="username" value="{{ .Username }}" required><br>
+    <label>パスワード: </label><input type="password" class="input" name="password" required></br>
+    <input class="btn" type="submit" value="ログイン">
 </form>
-<p><a href="/user/new">ユーザ登録</a></p>
-<a href="/"><button type="button">トップページへ戻る</button></a>
+<div class="inner">
+    <a href="/user/new"><button class = "btn" type="button">ユーザー登録</button></a>
+    <!--<p><a href="/user/new">ユーザ登録</a></p>-->
+    <a href="/"><button class = "btn" type="button">トップページへ戻る</button></a>
+</div>
 {{ template "footer" }}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"encoding/hex"
 	"regexp"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/sessions"
 	database "todolist.go/db"
@@ -166,6 +167,140 @@ func Logout(ctx *gin.Context) {
     session.Options(sessions.Options{MaxAge: -1})
     session.Save()
     ctx.Redirect(http.StatusFound, "/login")
+}
+
+func EditUserForm(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	var user database.User
+	fmt.Println(userID)
+	err = db.Get(&user, "SELECT id, name FROM users WHERE id =?", userID) // Use DB#Get for one entry
+	if err != nil {
+		// Error(http.StatusBadRequest, err.Error())(ctx)
+		ctx.Redirect(http.StatusFound, "/")
+		return
+	}
+	// Render edit form
+	ctx.HTML(http.StatusOK, "form_edit_user.html",
+		gin.H{"Title": fmt.Sprintf("Edit user %d", user.ID), "User": user})
+}
+
+func EditUserNameForm(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	var user database.User
+	fmt.Println(userID)
+	err = db.Get(&user, "SELECT id, name FROM users WHERE id =?", userID) // Use DB#Get for one entry
+	if err != nil {
+		// Error(http.StatusBadRequest, err.Error())(ctx)
+		ctx.Redirect(http.StatusFound, "/")
+		return
+	}
+	fmt.Println("YYYYYYYYYYYY")
+	// Render edit form
+	ctx.HTML(http.StatusOK, "form_edit_user_name.html",
+		gin.H{"Title": fmt.Sprintf("Edit user %d", user.ID), "User": user})
+}
+
+func UpdateUserName(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
+
+    username := ctx.PostForm("username")
+    password := ctx.PostForm("password")
+
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+
+	// 重複チェック
+	var duplicate int
+	err = db.Get(&duplicate, "SELECT COUNT(*) FROM users WHERE name=?", username)
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	if duplicate > 0 {
+		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Username is already taken", "Username": username})
+		return
+	}
+	if !matchPassword(password) {
+		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password does not meet the conditions", "Username": username})
+		return
+	}
+	fmt.Println("EEEEEEEEEEEE")
+	// DB への保存
+	_, err = db.Exec("UPDATE users SET name=? WHERE id=? AND password=?", username, userID,hash(password))
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	fmt.Println("EEEEEEEEEEEE")
+	ctx.Redirect(http.StatusFound, "/")
+}
+
+func EditUserPasswordForm(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	var user database.User
+	fmt.Println(userID)
+	err = db.Get(&user, "SELECT id, name FROM users WHERE id =?", userID) // Use DB#Get for one entry
+	if err != nil {
+		// Error(http.StatusBadRequest, err.Error())(ctx)
+		ctx.Redirect(http.StatusFound, "/")
+		return
+	}
+	fmt.Println("YYYYYYYYYYYY")
+	// Render edit form
+	ctx.HTML(http.StatusOK, "form_edit_user_password.html",
+		gin.H{"Title": fmt.Sprintf("Edit user %d", user.ID), "User": user})
+}
+
+func UpdateUserPassword(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
+
+    oldpassword := ctx.PostForm("oldpassword")
+	password := ctx.PostForm("password")
+	passwordForConfirm := ctx.PostForm("passwordForConfirm")
+
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	if password != passwordForConfirm {
+		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password does not meet the conditions"})
+		return
+	}
+	if !matchPassword(password) {
+		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password does not meet the conditions"})
+		return
+	}
+	// DB への保存
+	_, err = db.Exec("UPDATE users SET password=? WHERE id=? AND password=?", hash(password), userID,hash(oldpassword))
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	ctx.Redirect(http.StatusFound, "/")
 }
 
 
