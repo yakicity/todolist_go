@@ -55,8 +55,15 @@ func TaskList(ctx *gin.Context) {
 		return
 	}
 
+	var user database.User
+	err = db.Get(&user, "SELECT id, name FROM users WHERE id =?", userID) // Use DB#Get for one entry
+	if err != nil {
+		// Error(http.StatusBadRequest, err.Error())(ctx)
+		ctx.Redirect(http.StatusFound, "/")
+		return
+	}
 	// Render tasks
-	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list", "Tasks": tasks, "Kw": kw,"Value":is_done_status})
+	ctx.HTML(http.StatusOK, "task_list.html", gin.H{"Title": "Task list","SessionUser": user.Name, "Tasks": tasks, "Kw": kw,"Value":is_done_status})
 }
 
 // ShowTask renders a task with given ID
@@ -322,7 +329,8 @@ func UpdateShareTask(ctx *gin.Context){
 			ctx.Redirect(http.StatusFound, "/list")
 			return
 		}
-		ctx.HTML(http.StatusBadRequest, "form_share_task.html", gin.H{"Title": "", "Username": username, "Task": task, "Error": "No such user"})
+		ctx.HTML(http.StatusBadRequest, "form_share_task.html", 
+			gin.H{"Title": "", "Username": username, "Task": task, "Error": "No such user"})
         return
     }
 
@@ -336,7 +344,8 @@ func UpdateShareTask(ctx *gin.Context){
 			ctx.Redirect(http.StatusFound, "/list")
 			return
 		}
-		ctx.HTML(http.StatusBadRequest, "form_share_task.html", gin.H{"Title": "", "Username": username, "Task": task, "Error": "this task has already shared with the person"})
+		ctx.HTML(http.StatusBadRequest, "form_share_task.html", 
+		gin.H{"Title": "", "Username": username, "Task": task, "Error": "this task has already shared with the person"})
         return
     }
 	// Render status
@@ -377,7 +386,8 @@ func DeleteShareTask(ctx *gin.Context) {
 			ctx.Redirect(http.StatusFound, "/list")
 			return
 		}
-		ctx.HTML(http.StatusBadRequest, "form_share_task.html", gin.H{"Title": "", "Task": task, "Error": "this task has not shared yet. you should delete task or share it with someone"})
+		ctx.HTML(http.StatusBadRequest, "form_share_task.html", gin.H{"Title": "", "Task": task, 
+		"Error": "this task has not shared yet. you should delete task or share it with someone"})
         return
     }
 	_, err = db.Exec("DELETE FROM ownership WHERE task_id =? AND user_id = ?",id,userID)

@@ -43,7 +43,6 @@ func main() {
 	
 	engine.GET("/", service.Home)
 	engine.GET("/list", service.LoginCheck, service.TaskList)
-    
 	taskGroup := engine.Group("/task")
     taskGroup.Use(service.LoginCheck)
     {
@@ -58,21 +57,16 @@ func main() {
 		taskGroup.POST("/share/:id", service.UpdateShareTask)
 		taskGroup.GET("/share/delete/:id", service.DeleteShareTask)
     }	
-	// ユーザ登録
 	engine.GET("/user/new", service.NewUserForm)
 	engine.POST("/user/new", service.RegisterUser)
-	//ログイン
 	engine.GET("/login", service.LoginPage)
 	engine.POST("/login", service.Login)	
-	// ログアウト
 	engine.GET("/logout", service.Logout)	
-
 	userGroup := engine.Group("/user")
     userGroup.Use(service.LoginCheck)
     {
-		// ユーザー削除
 		userGroup.GET("/delete", service.DeleteUser)
-		// ユーザー情報変更
+		// ユーザー情報変更系
 		userGroup.GET("/edit", service.EditUserForm)
 		userGroup.GET("/edit/name", service.EditUserNameForm)
 		userGroup.POST("/edit/name", service.UpdateUserName)

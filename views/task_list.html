@@ -1,6 +1,6 @@
 {{ template "header" . }}
 
-<h1>List of tasks</h1>
+<h1>{{ .SessionUser }} さんの List of tasks </h1>
 <form action="/list" method="GET">
   <input type="text" class="input" name="kw" value="{{ .Kw }}" placeholder="検索用語を記述してください" />
 
