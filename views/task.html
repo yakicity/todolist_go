@@ -18,6 +18,8 @@
 <div class="inner">
   <a href="/list"><button class= "btn" type="button">リストへ戻る</button></a>
   <a href="/task/edit/{{ .ID }}"><button  class= "btn" type="button">編集</button></a>
+  <a href="/task/share/{{ .ID }}"><button  class= "btn" type="button">共有</button></a>
+  <a href="/task/share/delete/{{ .ID }}"><button  class= "btn" type="button">共有の停止</button></a>
   <button  class= "btn" type="button" onclick="confirm_delete({{ .ID }})">削除</button>
   <a href="/logout"><button  class= "btn" type="button">ログアウト</button></a>
   <!-- <p><a href="/logout">ログアウト</a></p> -->

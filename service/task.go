@@ -263,3 +263,128 @@ func DeleteTask(ctx *gin.Context) {
 	ctx.Redirect(http.StatusFound, "/list")
 }
 
+func ShareTaskForm(ctx *gin.Context){
+	userID := sessions.Default(ctx).Get("user")
+	// Get task id
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		Error(http.StatusBadRequest, err.Error())(ctx)
+		return
+	}
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	// Get target task
+	var task database.Task
+
+	err = db.Get(&task, "SELECT id, title, created_at, is_done, description, priority, deadline FROM tasks INNER JOIN ownership ON task_id = id WHERE task_id =? AND ownership.user_id = ?", id,userID)
+	if err != nil {
+		// Error(http.StatusBadRequest, err.Error())(ctx)
+		ctx.Redirect(http.StatusFound, "/list")
+		return
+	}
+
+	// Render edit form
+	ctx.HTML(http.StatusOK, "form_share_task.html",
+		gin.H{"Title": fmt.Sprintf("Edit task %d", task.ID), "Task": task})
+}
+
+func UpdateShareTask(ctx *gin.Context){
+	// Get task id
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		Error(http.StatusBadRequest, err.Error())(ctx)
+		return
+	}
+	// Get share username 
+	// requireなので絶対に存在する
+	username, _ := ctx.GetPostForm("username")
+	
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+
+    // ユーザの取得
+    var user database.User
+    err = db.Get(&user, "SELECT id, name FROM users WHERE name = ?", username)
+    if err != nil {
+		userID := sessions.Default(ctx).Get("user")
+		// Get target task
+		var task database.Task
+		err = db.Get(&task, "SELECT id, title, created_at, is_done, description, priority, deadline FROM tasks INNER JOIN ownership ON task_id = id WHERE task_id =? AND ownership.user_id = ?", id,userID)
+		if err != nil {
+			ctx.Redirect(http.StatusFound, "/list")
+			return
+		}
+		ctx.HTML(http.StatusBadRequest, "form_share_task.html", gin.H{"Title": "", "Username": username, "Task": task, "Error": "No such user"})
+        return
+    }
+
+	_, err = db.Exec("INSERT INTO ownership (user_id, task_id) VALUES (?, ?)", user.ID, id)
+    if err != nil {
+		userID := sessions.Default(ctx).Get("user")
+		// Get target task
+		var task database.Task
+		err = db.Get(&task, "SELECT id, title, created_at, is_done, description, priority, deadline FROM tasks INNER JOIN ownership ON task_id = id WHERE task_id =? AND ownership.user_id = ?", id,userID)
+		if err != nil {
+			ctx.Redirect(http.StatusFound, "/list")
+			return
+		}
+		ctx.HTML(http.StatusBadRequest, "form_share_task.html", gin.H{"Title": "", "Username": username, "Task": task, "Error": "this task has already shared with the person"})
+        return
+    }
+	// Render status
+	path := "/list" // デフォルトではタスク一覧ページへ戻る
+	// if id, err := result.LastInsertId(); err == nil {
+	path = fmt.Sprintf("/task/%d", id) // 正常にIDを取得できた場合は /task/<id> へ戻る
+	// }
+	ctx.Redirect(http.StatusFound, path)
+}
+
+func DeleteShareTask(ctx *gin.Context) {
+	userID := sessions.Default(ctx).Get("user")
+	// Get task id
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		Error(http.StatusBadRequest, err.Error())(ctx)
+		return
+	}
+	// Get DB connection
+	db, err := database.GetConnection()
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+	
+	// 共有しているかチェック→してなければ消えないようにする
+	var duplicate int
+	err = db.Get(&duplicate, "SELECT COUNT(*) FROM ownership WHERE task_id=?", id)
+	if err != nil {
+		Error(http.StatusInternalServerError, err.Error())(ctx)
+		return
+	}
+    if duplicate < 2 {
+		// Get target task
+		var task database.Task
+		err = db.Get(&task, "SELECT id, title, created_at, is_done, description, priority, deadline FROM tasks INNER JOIN ownership ON task_id = id WHERE task_id =? AND ownership.user_id = ?", id,userID)
+		if err != nil {
+			ctx.Redirect(http.StatusFound, "/list")
+			return
+		}
+		ctx.HTML(http.StatusBadRequest, "form_share_task.html", gin.H{"Title": "", "Task": task, "Error": "this task has not shared yet. you should delete task or share it with someone"})
+        return
+    }
+	_, err = db.Exec("DELETE FROM ownership WHERE task_id =? AND user_id = ?",id,userID)
+	if err != nil {
+		ctx.Redirect(http.StatusFound, "/list")
+		return
+	}
+	// Redirect to /list
+	ctx.Redirect(http.StatusFound, "/list")
+}

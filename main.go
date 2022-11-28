@@ -53,6 +53,10 @@ func main() {
         taskGroup.GET("/edit/:id", service.EditTaskForm)
         taskGroup.POST("/edit/:id", service.UpdateTask)
         taskGroup.GET("/delete/:id", service.DeleteTask)
+		// タスクの共有
+		taskGroup.GET("/share/:id", service.ShareTaskForm)
+		taskGroup.POST("/share/:id", service.UpdateShareTask)
+		taskGroup.GET("/share/delete/:id", service.DeleteShareTask)
     }	
 	// ユーザ登録
 	engine.GET("/user/new", service.NewUserForm)
@@ -62,14 +66,19 @@ func main() {
 	engine.POST("/login", service.Login)	
 	// ログアウト
 	engine.GET("/logout", service.Logout)	
-	// ユーザー削除
-	engine.GET("/user/delete", service.LoginCheck, service.DeleteUser)
-	// ユーザー情報変更
-	engine.GET("/user/edit", service.LoginCheck, service.EditUserForm)
-	engine.GET("/user/edit/name", service.LoginCheck, service.EditUserNameForm)
-	engine.POST("/user/edit/name", service.LoginCheck, service.UpdateUserName)
-	engine.GET("/user/edit/password", service.LoginCheck, service.EditUserPasswordForm)
-	engine.POST("/user/edit/password", service.LoginCheck, service.UpdateUserPassword)
+
+	userGroup := engine.Group("/user")
+    userGroup.Use(service.LoginCheck)
+    {
+		// ユーザー削除
+		userGroup.GET("/delete", service.DeleteUser)
+		// ユーザー情報変更
+		userGroup.GET("/edit", service.EditUserForm)
+		userGroup.GET("/edit/name", service.EditUserNameForm)
+		userGroup.POST("/edit/name", service.UpdateUserName)
+		userGroup.GET("/edit/password", service.EditUserPasswordForm)
+		userGroup.POST("/edit/password", service.UpdateUserPassword)
+    }	
 	// start server
 	engine.Run(fmt.Sprintf(":%d", port))
 }

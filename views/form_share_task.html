@@ -1,0 +1,20 @@
+{{ template "header" . }}
+<h1>Task {{ .Task.ID }} の共有</h1>
+{{ if .Error }}
+<p><font color="#FF0000">{{ .Error }}</font></p>
+{{ end }}
+<form action="/task/share/{{ .Task.ID }}" method="POST" onsubmit = "return confirm_share_update({{ .Task.ID }})">
+    <label>Title : </label> {{ .Task.Title }} 
+    <br>
+    <label>Description : </label> {{ .Task.Description }}
+    <br>
+    <label>共有者 :  </label><input type="text" class="input"  name="username" value="{{.Username}}" required><br>
+    <input class="btn" type="submit" value="共有">
+</form>
+<div class="inner">
+    <a href="/task/{{ .Task.ID }}"><button class = "btn" type="button">戻る</button></a>
+    <a href="/logout"><button class = "btn" type="button">ログアウト</button></a>
+</div>
+{{ template "footer" }}
+
+
