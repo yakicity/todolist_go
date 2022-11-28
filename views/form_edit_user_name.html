@@ -6,7 +6,6 @@
 <form action="/user/edit/name" method="POST"  onsubmit = "return confirm_user_update({{ .User.Name }})">
     <label>新しいユーザ名: </label><input class="input" type="text" name="username" value="{{ .User.Name }}"required><br>
     <label>以前のパスワード: </label><input class="input" type="text" name="password" required><br>
-    ※パスワードは8文字以上、半角英字と半角英字を少なくとも一文字ずつ含む必要があります。<br>
     <input class="btn" type="submit" value="登録">
 </form>
 <div class="inner">

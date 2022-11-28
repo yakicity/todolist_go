@@ -38,10 +38,10 @@
       {{ range $task := .Tasks }}
       <tr>
         <td class="id"  style="width:50px;"><a href="/task/{{ $task.ID }}">{{ $task.ID }}</a></td>
-        <td class="title">{{ $task.Title }}</td>
+        <td class="priority-{{$task.Priority }}">{{ $task.Title }}</td>
         <td class="date">{{ $task.CreatedAt }}</td>
         <td class="condition" style="width:50px;">{{ if $task.IsDone }}済{{ end }}</td>
-        <td class="priority" style="width:80px;">{{ $task.Priority }}</td>
+        <td class="priority-{{$task.Priority }}" style="width:80px;">{{ $task.Priority }}</td>
         <td class="deadline">{{ $task.Deadline }}</td>
       </tr>
       {{ end }}
@@ -57,7 +57,7 @@
 <script>
   var options = {
     valueNames: ["id", "title", "date", "condition", "priority", "deadline"],
-    page: 10,
+    page: 3,
     pagination: {
       paginationClass: "pagination",
       innerWindow: 1,

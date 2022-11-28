@@ -39,10 +39,9 @@ func main() {
 
 	// routing
 	engine.Static("/assets", "./assets")
-	engine.GET("/", service.Home)
 
 	
-	// engine.GET("/list",service.TaskList)
+	engine.GET("/", service.Home)
 	engine.GET("/list", service.LoginCheck, service.TaskList)
     
 	taskGroup := engine.Group("/task")
@@ -58,17 +57,15 @@ func main() {
 	// ユーザ登録
 	engine.GET("/user/new", service.NewUserForm)
 	engine.POST("/user/new", service.RegisterUser)
-
 	//ログイン
 	engine.GET("/login", service.LoginPage)
 	engine.POST("/login", service.Login)	
-
+	// ログアウト
 	engine.GET("/logout", service.Logout)	
-
+	// ユーザー削除
 	engine.GET("/user/delete", service.LoginCheck, service.DeleteUser)
-
+	// ユーザー情報変更
 	engine.GET("/user/edit", service.LoginCheck, service.EditUserForm)
-
 	engine.GET("/user/edit/name", service.LoginCheck, service.EditUserNameForm)
 	engine.POST("/user/edit/name", service.LoginCheck, service.UpdateUserName)
 	engine.GET("/user/edit/password", service.LoginCheck, service.EditUserPasswordForm)

@@ -34,7 +34,8 @@ func RegisterUser(ctx *gin.Context) {
 	case password == "":
 		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password is not provided", "Password": password})
 	case passwordForConfirm == "":
-		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password for confirmation is not provided", "PasswordForConfirm": passwordForConfirm})
+		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": 
+				"Password for confirmation is not provided", "PasswordForConfirm": passwordForConfirm})
 	}
 
 	// DB 接続
@@ -56,14 +57,16 @@ func RegisterUser(ctx *gin.Context) {
 		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Username is already taken", "Username": username})
 		return
 	}
-
 	// パスワード二回入力があっているか確認
 	if password != passwordForConfirm {
-		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password for confirmation is not correct ", "Username": username})
+		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": 
+				"Password for confirmation is not correct ", "Username": username})
 		return
 	}
+	//パスワードが指定の条件か確認
 	if !matchPassword(password) {
-		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password does not meet the conditions", "Username": username})
+		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": 
+				"Password does not meet the conditions", "Username": username})
 		return
 	}
 
@@ -91,7 +94,8 @@ func matchPassword(password string) bool {
 	if len(password) < 8 { // 6文字以上か判定
 		return false
 	}
-	if !(regexp.MustCompile("^[0-9a-zA-Z!-/:-@[-`{-~]+$").Match([]byte(password))) { // 英数字記号以外を使っているか判定
+	// 英数字記号以外を使っているか判定
+	if !(regexp.MustCompile("^[0-9a-zA-Z!-/:-@[-`{-~]+$").Match([]byte(password))) {
 		return false
 	}
 	reg := []*regexp.Regexp{
@@ -240,7 +244,19 @@ func UpdateUserName(ctx *gin.Context) {
 		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password does not meet the conditions", "Username": username})
 		return
 	}
-	fmt.Println("EEEEEEEEEEEE")
+
+    // ユーザの取得
+    var user database.User
+    err = db.Get(&user, "SELECT id, name, password FROM users WHERE name = ?", username)
+    if err != nil {
+        ctx.HTML(http.StatusBadRequest, "login.html", gin.H{"Title": "Login", "Username": username, "Error": "No such user"})
+        return
+    }
+    // パスワードの照合
+    if hex.EncodeToString(user.Password) != hex.EncodeToString(hash(password)) {
+        ctx.HTML(http.StatusBadRequest, "login.html", gin.H{"Title": "Login", "Username": username, "Error": "Incorrect password"})
+        return
+    }
 	// DB への保存
 	_, err = db.Exec("UPDATE users SET name=? WHERE id=? AND password=?", username, userID,hash(password))
 	if err != nil {
@@ -294,6 +310,18 @@ func UpdateUserPassword(ctx *gin.Context) {
 		ctx.HTML(http.StatusBadRequest, "new_user_form.html", gin.H{"Title": "Register user", "Error": "Password does not meet the conditions"})
 		return
 	}
+    // // ユーザの取得
+    // var user database.User
+    // err = db.Get(&user, "SELECT id, name, password FROM users WHERE id = ?", userID)
+    // if err != nil {
+    //     ctx.HTML(http.StatusBadRequest, "login.html", gin.H{"Title": "Login", "Error": "No such user"})
+    //     return
+    // }
+    // // パスワードの照合
+    // if hex.EncodeToString(user.Password) != hex.EncodeToString(hash(oldpassword)) {
+    //     ctx.HTML(http.StatusBadRequest, "login.html", gin.H{"Title": "Login", "Error": "Incorrect password"})
+    //     return
+    // }
 	// DB への保存
 	_, err = db.Exec("UPDATE users SET password=? WHERE id=? AND password=?", hash(password), userID,hash(oldpassword))
 	if err != nil {
@@ -326,3 +354,16 @@ func DeleteUser(ctx *gin.Context){
 	// logout
 	Logout(ctx)
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

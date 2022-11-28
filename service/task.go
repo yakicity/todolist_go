@@ -78,38 +78,12 @@ func ShowTask(ctx *gin.Context) {
 	}
 	// Get a task with given ID
 	var task database.Task
-	// err = db.Get(&task, "SELECT * FROM tasks WHERE id=?", id) // Use DB#Get for one entry
-	// if err != nil {
-	// 	Error(http.StatusBadRequest, err.Error())(ctx)
-	// 	return
-	// }
 	err = db.Get(&task, "SELECT id, title, created_at, is_done, description, priority, deadline FROM tasks INNER JOIN ownership ON task_id = id WHERE task_id =? AND ownership.user_id = ?", id,userID) // Use DB#Get for one entry
 	if err != nil {
 		// Error(http.StatusBadRequest, err.Error())(ctx)
 		ctx.Redirect(http.StatusFound, "/list")
 		return
 	}
-
-	// rows, err := db.Query("SELECT * FROM ownership WHERE task_id =?",id)
-	// if err != nil {
-	// 	fmt.Println("YYYYYYYYYYYY")
-	// 	Error(http.StatusInternalServerError, err.Error())(ctx)
-	// 	return
-	// }
-	// task_user_id := 0
-	// for rows.Next() {
-	// 	owner := ownership{}
-	// 	rows.Scan(&owner.user_id, &owner.task_id)
-	// 	fmt.Println(owner.user_id)
-	// 	task_user_id = owner.user_id
-	// }
-	// u_id_string := strconv.Itoa(u_id)
-	// u_id_u64,_ :=strconv.ParseUint(u_id_string, 10, 64)
-	// if task_user_id - userID == 0{
-	// 	fmt.Println("EEEEEEEEEEE")
-	// 	ctx.Redirect(http.StatusFound, "/list")
-	// }
-	// fmt.Println(task_user_id)
 
 	// Render task
 	ctx.HTML(http.StatusOK, "task.html", task)
@@ -135,13 +109,7 @@ func RegisterTask(ctx *gin.Context) {
 	deadlinedate, exist := ctx.GetPostForm("deadlinedate")
 	deadlinetime, exist := ctx.GetPostForm("deadlinetime")
 	priority, exist := ctx.GetPostForm("priority")
-
 	deadline := deadlinedate + " " + deadlinetime + ":00"
-	fmt.Println(deadline)
-	if deadlinedate == "" || deadlinetime == "" {
-		deadline = ""
-		fmt.Println(deadline)
-	}
 
 	// Get DB connection
     db, err := database.GetConnection()
@@ -151,13 +119,9 @@ func RegisterTask(ctx *gin.Context) {
     }
     tx := db.MustBegin()
 	var result sql.Result
-	
-	if (deadlinedate == "" || deadlinetime == ""){
-		result, err = tx.Exec("INSERT INTO tasks (title, description, priority) VALUES (?,?,?)", title, description,priority)
-	} else {
-    	result, err = tx.Exec("INSERT INTO tasks (title, description, priority,deadline) VALUES (?,?,?,?)", title, description,priority,deadline)
-	}
-	// result, err := tx.Exec("INSERT INTO tasks (title, description, priority,deadline) VALUES (?,?,?,?)", title, description,priority,deadline)
+	result, err = tx.Exec("INSERT INTO tasks (title, description, priority,deadline) VALUES (?,?,?,?)", title, description,priority,deadline)
+
+
 	if err != nil {
 		tx.Rollback()
 		Error(http.StatusInternalServerError, err.Error())(ctx)
@@ -179,23 +143,6 @@ func RegisterTask(ctx *gin.Context) {
     }
     tx.Commit()
     ctx.Redirect(http.StatusFound, fmt.Sprintf("/task/%d", taskID))
-	// db, err := database.GetConnection()
-	// if err != nil {
-	// 	Error(http.StatusInternalServerError, err.Error())(ctx)
-	// 	return
-	// }
-	// // Create new data with given title on DB
-	// result, err := db.Exec("INSERT INTO tasks (title, description) VALUES (?,?)", title, description)
-	// if err != nil {
-	// 	Error(http.StatusInternalServerError, err.Error())(ctx)
-	// 	return
-	// }
-	// // Render status
-	// path := "/list" // デフォルトではタスク一覧ページへ戻る
-	// if id, err := result.LastInsertId(); err == nil {
-	// 	path = fmt.Sprintf("/task/%d", id) // 正常にIDを取得できた場合は /task/<id> へ戻る
-	// }
-	// ctx.Redirect(http.StatusFound, path)
 }
 
 func EditTaskForm(ctx *gin.Context) {
@@ -220,7 +167,7 @@ func EditTaskForm(ctx *gin.Context) {
 	// 	return
 	// }
 
-	err = db.Get(&task, "SELECT id, title, created_at, is_done, description, priority, deadline FROM tasks INNER JOIN ownership ON task_id = id WHERE task_id =? AND ownership.user_id = ?", id,userID) // Use DB#Get for one entry
+	err = db.Get(&task, "SELECT id, title, created_at, is_done, description, priority, deadline FROM tasks INNER JOIN ownership ON task_id = id WHERE task_id =? AND ownership.user_id = ?", id,userID)
 	if err != nil {
 		// Error(http.StatusBadRequest, err.Error())(ctx)
 		ctx.Redirect(http.StatusFound, "/list")
