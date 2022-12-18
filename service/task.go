@@ -219,7 +219,7 @@ func UpdateTask(ctx *gin.Context) {
 
 	deadline := deadlinedate + " " + deadlinetime + ":00"
 	fmt.Println(deadline)
-
+	
 	// Get DB connection
 	db, err := database.GetConnection()
 	if err != nil {
